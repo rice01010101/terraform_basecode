@@ -1,0 +1,32 @@
+name: Terraform auto format
+on:
+  push:
+    branches:
+      - 'feature/**'
+jobs:
+  AutoFormat:
+    name: auto format
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+      - name: terraform fmt check
+        id: fmt-check
+        run: terraform fmt -recursive -check
+        continue-on-error: true
+      - name: terraform fmt
+        if: steps.fmt-check.outcome == 'failure'
+        run: terraform fmt -recursive
+      - name: auto commit
+        if: steps.fmt-check.outcome == 'failure'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: terraform fmt auto commit
