@@ -1,0 +1,30 @@
+name: Create or Update Pullrequest
+on:
+  push:
+    branches:
+      - 'feature/**'
+jobs:
+  CreateUpdatePullrequest:
+    name: create update pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: reset promotion branch
+        run: |
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
+      - name: create or update pullrequest
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: ${{ github.ref_name }}
+          title: main <- ${{ github.ref_name }}
+          body: |
+            this is body.
+            second line.
+            ${{ github.triggering_actor }}
+            ${{ github.actor }}
+          assignees: ${{ github.actor }}
+          reviewers: ${{ github.actor }}

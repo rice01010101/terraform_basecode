@@ -18,3 +18,7 @@
 #     Name = "HelloWorld"
 #   }
 # }
+
+locals {
+  a = 123456
+}
