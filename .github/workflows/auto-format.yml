@@ -22,6 +22,7 @@ jobs:
         id: fmt-check
         run: terraform fmt -recursive -check
         continue-on-error: true
+      # fmt check で対象ファイルが見つかった時だけ以下の処理でfmtしそれをコミットする。
       - name: terraform fmt
         if: steps.fmt-check.outcome == 'failure'
         run: terraform fmt -recursive

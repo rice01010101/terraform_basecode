@@ -1,10 +1,11 @@
-name: Create or update Pullrequest
+name: Create or Update Pullrequest
 on:
   push:
     branches:
       - 'feature/**'
 jobs:
   CreateUpdatePullrequest:
+    name: create update pull request
     runs-on: ubuntu-latest
     steps:
       - name: checkout
