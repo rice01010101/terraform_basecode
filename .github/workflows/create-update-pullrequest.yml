@@ -26,5 +26,5 @@ jobs:
             second line.
             ${{ github.triggering_actor }}
             ${{ github.actor }}
-        #   assignees: 
-        #   reviewers: 
+          assignees: ${{ github.actor }}
+          reviewers: ${{ github.actor }}
