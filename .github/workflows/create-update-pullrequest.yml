@@ -17,7 +17,7 @@ jobs:
           git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
           git reset --head ${{ github.ref_name }}
       - name: create or update pullrequest
-        uses: peter-evans/create-pull-request
+        uses: peter-evans/create-pull-request@v5
         with:
           branch: ${{ github.ref_name }}
           title: main <- ${{ github.ref_name }}
