@@ -1,5 +1,5 @@
 provider "aws" {
-  region     = var.primary_resource_region
+  region = var.primary_resource_region
 }
 
 data "aws_availability_zones" "available" {}
