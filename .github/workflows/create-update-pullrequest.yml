@@ -20,6 +20,7 @@ jobs:
           git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
           git reset --hard ${{ github.ref_name }}
       - name: create or update pullrequest
+        id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
           branch: ${{ github.ref_name }}
@@ -27,9 +28,9 @@ jobs:
           body: |
             this is body.
             second line.
-            ${{ github.triggering_actor }}
-            ${{ github.actor }}
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
       - name: auto labeling
         uses: actions/labeler@v5
+        with:
+          pr-number: ${{ steps.cpr.outputs.pull-request-number }}
