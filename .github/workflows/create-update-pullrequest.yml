@@ -7,6 +7,9 @@ jobs:
   CreateUpdatePullrequest:
     name: create update pull request
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -28,3 +31,5 @@ jobs:
             ${{ github.actor }}
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
+      - name: auto labeling
+        uses: actions/labeler@v5
