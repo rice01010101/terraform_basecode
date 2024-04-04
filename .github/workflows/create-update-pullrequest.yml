@@ -34,3 +34,5 @@ jobs:
         uses: actions/labeler@v5
         with:
           pr-number: ${{ steps.cpr.outputs.pull-request-number }}
+          sync-labels: true
+          configuration-path: .github/labeler.yml
