@@ -1,0 +1,118 @@
+name: before deploy
+ 
+on:
+  workflow_run:
+    workflows: [Create or Update Pullrequest]
+    types:
+      - completed
+
+jobs:
+  BeforeDeploy:
+    name: main
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - id: get-pr-label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          pr_labels=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels|map(.name)')
+          echo "pr_labels=$pr_labels" >> "$GITHUB_OUTPUT"
+      - name: Get Terraform Version
+        id: tf_version
+        run: |
+          echo "value=$(cat .terraform-version)" >> $GITHUB_OUTPUT
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.tf_version.outputs.value }}
+      - name: Setup AWS auth
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: 'ap-northeast-1'
+          role-to-assume: 'arn:aws:iam::<ACOUNT_ID>:role/<ROLENAME>'
+      - name: test env terraform init
+        id: init
+        if: contains(fromJSON(steps.get-pr-label.outputs.pr_labels), 'test-ghact')
+        working-directory: examples/aws/environments/test-ghact
+        run: terraform init -no-color
+      - name: test env terraform validate
+        id: validate
+        if: contains(fromJSON(steps.get-pr-label.outputs.pr_labels), 'test-ghact')
+        working-directory: examples/aws/environments/test-ghact
+        run: terraform validate -no-color
+      - name: test env terraform plan
+        id: plan
+        if: contains(fromJSON(steps.get-pr-label.outputs.pr_labels), 'test-ghact')
+        working-directory: examples/aws/environments/test-ghact
+        run: terraform plan -no-color
+      - name: Sticky Pull Request Comment
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          header: examples/aws/environments/test-ghact Terraform Init Result
+          number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          message: |
+            # Init
+            ## Result
+            ${{ steps.init.outcome }}
+            ## Output
+            ### stdout: 
+             
+            ``` 
+             ${{ steps.init.outputs.stdout }}
+            ``` 
+ 
+            ### stderr: 
+             
+            ``` 
+            ${{ steps.init.outputs.stdout }}
+            ``` 
+
+      - uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          header: examples/aws/environments/test-ghact Terraform Validate Result
+          number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          message: |
+            # Validate
+            ## Result
+            ${{ steps.validate.outcome }}
+            ## Output
+            ### stdout:
+
+            ``` 
+            ${{ steps.validate.outputs.stdout }}
+            ``` 
+
+            ### stderr:
+
+            ``` 
+            ${{ steps.validate.outputs.stderr }}
+            ``` 
+
+      - uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          header: examples/aws/environments/test-ghact Terraform Plan Result
+          number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          message: |
+            # Plan
+            ## Result
+            ${{ steps.plan.outcome }}
+            ## Output
+            ### stdout: 
+
+            ``` 
+            ${{ steps.plan.outputs.stdout }}  
+            ``` 
+ 
+            ### stderr:
+
+            ``` 
+            ${{ steps.plan.outputs.stdout }}
+            ```
