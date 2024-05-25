@@ -1,0 +1,25 @@
+name: Get pullrequest label
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+    outputs:
+      pr_labels:
+        description: "specific pullrequest labels. Array(string) format."
+        value: ${{ jobs.get_pr_label.outputs.job_output_labels }}
+jobs:
+  get_pr_label:
+    runs-on: ubuntu-latest
+    outputs:
+      job_output_labels: ${{ steps.getlabel.outputs.step_output_labels }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - id: getlabel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tmp_pr_labels=$(gh pr view "${{ inputs.pr_number }}" --json labels --jq '.labels|map(.name)')
+          echo "step_output_labels=$tmp_pr_labels" >> "$GITHUB_OUTPUT"

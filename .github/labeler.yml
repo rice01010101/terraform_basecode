@@ -1,0 +1,7 @@
+test-ghact:
+- changed-files:
+  - any-glob-to-any-file: 'examples/aws/environments/test-ghact/**'
+
+dev:
+- changed-files:
+  - any-glob-to-any-file: 'examples/aws/environments/dev/**'
