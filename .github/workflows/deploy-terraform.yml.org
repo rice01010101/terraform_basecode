@@ -1,0 +1,75 @@
+name: deploy terraform
+ on:
+   pull_request:
+     types: [closed]
+     branches: ["main"]
+ jobs:
+   get_pr_label:
+     if: github.event.pull_request.merged == true
+     uses: ./.github/workflows/get-pullrequest-label.yml
+     with:
+       pr_number: ${{ github.event.number }}
+   deploy:
+     if: github.event.pull_request.merged == true
+     needs: get_pr_label
+     runs-on: ubuntu-latest
+     env:
+       env_accountid_mapping: '{"test": "123409875678", "dev": "123409875678"}'
+     steps:
+       - name: checkout
+         uses: actions/checkout@v4
+       ##### Setup Terraform and AWS
+       - name: Get Terraform Version
+         id: tf_version
+         # .terraform-versionから使用するバージョンを自動取得・設定
+         run: |
+           echo "value=$(cat .terraform-version)" >> $GITHUB_OUTPUT
+       - name: Setup Terraform
+         uses: hashicorp/setup-terraform@v3
+         with:
+           terraform_version: ${{ steps.tf_version.outputs.value }}
+       - name: set deploy env aws account id
+         id: aws_account_id
+         env: # デプロイ先環境名に応じたAWSアカウントIDを設定する（後続のIAMRole参照に利用）
+           ACCOUNT_ID: |-
+             ${{ fromJSON(env.env_accountid_mapping)[matrix.envs] }}
+         run: echo "value=$ACCOUNT_ID" >> "$GITHUB_OUTPUT"
+       - name: Setup AWS auth
+         uses: aws-actions/configure-aws-credentials@v4
+         with:
+           aws-region: "ap-northeast-1"
+           role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/yonai-ghact-oidc-role"
+       ##### Execute Terraform and related tools command
+       # Terraform
+       - name: terraform init
+         id: tf_init
+         working-directory: aws/${{ matrix.envs }}
+         run: terraform init -no-color
+         continue-on-error: true
+       - name: terraform apply
+         id: tf_apply
+         working-directory: aws/${{ matrix.envs }}
+         run: terraform apply -no-color
+         continue-on-error: true
+       ##### Output command result to pullrequest comments
+       - name: Sticky Pull Request Comment
+         uses: marocchino/sticky-pull-request-comment@v2.9.0
+         with:
+           header: aws/${{ matrix.envs }} Terraform Apply Result
+           number: ${{ github.event.number }}
+           message: |
+             # <span id="terraform-apply-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境：aws/${{ matrix.envs }}</span>
+             ## Apply
+             ### Result
+             ${{ steps.tf_apply.outcome }}
+             ### Output
+             #### stdout: 
+ 
+             ``` 
+             ${{ steps.tf_apply.outputs.stdout }}
+             ``` 
+ 
+             #### stderr: 
+ 
+             ``` 
+             ${{ steps.tf_apply.outputs.stderr }}
