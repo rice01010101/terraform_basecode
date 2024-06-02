@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     env:
       # job matrix毎の処理中環境に対応したアカウントIDを取得するためのJSON
-      env_accountid_mapping: '{"test": "123409875678", "dev": "123409875678"}'
+      env_accountid_mapping: '{"prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -43,29 +43,34 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: "ap-northeast-1"
-          role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/yonai-ghact-oidc-role"
+          role-to-assume: "arn:aws:iam::${{ secrets.AWS_TFSTATE_ACCOUNT_ID }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
       ##### Execute Terraform and related tools command
-      # Terraform
+      # Terraform 
       - name: terraform init
         id: tf_init
-        working-directory: aws/${{ matrix.envs }}
+        working-directory: ${{ matrix.envs }}
         run: terraform init -no-color
         continue-on-error: true
+      - name: Re Setup AWS auth
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: "ap-northeast-1"
+          role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
       - name: terraform validate
         id: tf_validate
-        working-directory: aws/${{ matrix.envs }}
+        working-directory: ${{ matrix.envs }}
         run: terraform validate -no-color
         continue-on-error: true
       - name: terraform plan
         id: tf_plan
-        working-directory: aws/${{ matrix.envs }}
+        working-directory: ${{ matrix.envs }}
         run: terraform plan -no-color
         continue-on-error: true
       # Trivy
       - uses: aquasecurity/trivy-action@master
         with:
           scan-type: "config"
-          scan-ref: aws/${{ matrix.envs }}
+          scan-ref: ${{ matrix.envs }}
           trivyignores: .trivyignore
           format: template
           template: "@.github/trivy-template.tpl"
@@ -73,15 +78,15 @@ jobs:
           output: "trivy-result.txt"
       - run: |
           sed -i '1i## Trivy Security Scan Result' trivy-result.txt
-          sed -i '1i# <span id="trivy-result-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境: aws/${{ matrix.envs }}</span>' trivy-result.txt
+          sed -i '1i# <span id="trivy-result-${{ matrix.envs }}">${{ matrix.envs }} 環境</span>' trivy-result.txt
       ##### Output command result to pullrequest comments
       - name: Sticky Pull Request Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
-          header: aws/${{ matrix.envs }} Terraform Init Result
+          header: ${{ matrix.envs }} Terraform Init Result
           number: ${{ github.event.number }}
           message: |
-            # <span id="terraform-init-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境：aws/${{ matrix.envs }}</span>
+            # <span id="terraform-init-${{ matrix.envs }}">${{ matrix.envs }} 環境</span>
             ## Init
             ### Result
             ${{ steps.tf_init.outcome }}
@@ -100,10 +105,10 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
-          header: aws/${{ matrix.envs }} Terraform Validate Result
+          header: ${{ matrix.envs }} Terraform Validate Result
           number: ${{ github.event.number }}
           message: |
-            # <span id="terraform-validate-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境：aws/${{ matrix.envs }}</span>
+            # <span id="terraform-validate-${{ matrix.envs }}">${{ matrix.envs }} 環境</span>
             ## Validate
             ### Result
             ${{ steps.tf_validate.outcome }}
@@ -122,10 +127,10 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
-          header: aws/${{ matrix.envs }} Terraform Plan Result
+          header: ${{ matrix.envs }} Terraform Plan Result
           number: ${{ github.event.number }}
           message: |
-            # <span id="terraform-plan-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境：aws/${{ matrix.envs }}</span>
+            # <span id="terraform-plan-${{ matrix.envs }}">${{ matrix.envs }} 環境</span>
             ## Plan
             ### Result
             ${{ steps.tf_plan.outcome }}
@@ -144,6 +149,6 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
-          header: aws/${{ matrix.envs }} Trivy Scan Result
+          header: ${{ matrix.envs }} Trivy Scan Result
           number: ${{ github.event.number }}
           path: trivy-result.txt
