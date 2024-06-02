@@ -16,3 +16,7 @@ resource "aws_instance" "web" {
     Name = "HelloWorld"
   }
 }
+
+locals {
+  tst = 1
+}
