@@ -35,11 +35,17 @@ jobs:
           filter_mode: "nofilter"
           flags: -tee
           reporter: github-pr-review
-      - name: tfvalidate
-        uses: reviewdog/action-terraform-validate@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: "${{ matrix.envs }}"
-          level: warning
-          filter_mode: "nofilter"
-          reporter: github-pr-review
+      # - name: Get Terraform Version
+      #   id: tf_version
+      #   # .terraform-versionから使用するバージョンを自動取得・設定
+      #   run: |
+      #     echo "value=$(cat .terraform-version)" >> $GITHUB_OUTPUT
+      # - name: tfvalidate
+      #   uses: reviewdog/action-terraform-validate@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     terraform_version: ${{ steps.tf_version.outputs.value }}
+      #     workdir: "${{ matrix.envs }}"
+      #     level: warning
+      #     filter_mode: "nofilter"
+      #     reporter: github-pr-review
