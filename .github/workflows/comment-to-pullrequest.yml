@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     env:
       # job matrix毎の処理中環境に対応したアカウントIDを取得するためのJSON
-      env_accountid_mapping: '{"aws/environments/prod": "899541356921", "aws/environments/dev": "899541356921"}'
+      env_accountid_mapping: '{"aws/environments/prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "aws/environments/dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: "ap-northeast-1"
-          role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
+          role-to-assume: "arn:aws:iam::${{ secrets.AWS_TFSTATE_ACCOUNT_ID }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
       ##### Execute Terraform and related tools command
       # Terraform 
       - name: terraform init
