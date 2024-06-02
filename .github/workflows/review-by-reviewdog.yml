@@ -22,7 +22,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_init: true
           tflint_config: ${{ github.workspace }}/.tflint.hcl
-          tflint_target_dir: "aws/${{ matrix.envs }}"
+          tflint_target_dir: "${{ matrix.envs }}"
           filter_mode: "nofilter" # target_dir配下は変更の有無などを問わず全てチェックする
           reporter: github-pr-review
       - name: trivy
@@ -30,7 +30,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           trivy_command: config # terraform config
-          trivy_target: "aws/${{ matrix.envs }}"
+          trivy_target: "${{ matrix.envs }}"
           trivy_version: latest
           filter_mode: "nofilter"
           flags: -tee
@@ -39,7 +39,7 @@ jobs:
         uses: reviewdog/action-terraform-validate@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: "aws/${{ matrix.envs }}"
+          workdir: "${{ matrix.envs }}"
           level: warning
           filter_mode: "nofilter"
           reporter: github-pr-review

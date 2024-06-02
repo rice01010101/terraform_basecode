@@ -21,7 +21,7 @@ name: deploy terraform
         contents: write
         pull-requests: write
       env:
-        env_accountid_mapping: '{"test": "123409875678", "dev": "123409875678"}'
+        env_accountid_mapping: '{"prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
       steps:
         - name: checkout
           uses: actions/checkout@v4
@@ -45,27 +45,32 @@ name: deploy terraform
           uses: aws-actions/configure-aws-credentials@v4
           with:
              aws-region: "ap-northeast-1"
-             role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/yonai-ghact-oidc-role"
+             role-to-assume: "arn:aws:iam::${{ secrets.AWS_TFSTATE_ACCOUNT_ID }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
         ##### Execute Terraform and related tools command
         # Terraform
         - name: terraform init
           id: tf_init
-          working-directory: aws/${{ matrix.envs }}
+          working-directory: ${{ matrix.envs }}
           run: terraform init -no-color
           continue-on-error: true
+        - name: Re Setup AWS auth
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-region: "ap-northeast-1"
+            role-to-assume: "arn:aws:iam::${{ steps.aws_account_id.outputs.value }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
         - name: terraform apply
           id: tf_apply
-          working-directory: aws/${{ matrix.envs }}
+          working-directory: ${{ matrix.envs }}
           run: terraform apply -no-color -auto-approve
           continue-on-error: true
         ##### Output command result to pullrequest comments
         - name: Sticky Pull Request Comment
           uses: marocchino/sticky-pull-request-comment@v2.9.0
           with:
-             header: aws/${{ matrix.envs }} Terraform Apply Result
+             header: ${{ matrix.envs }} Terraform Apply Result
              number: ${{ github.event.number }}
              message: |
-               # <span id="terraform-apply-aws/${{ matrix.envs }}">${{ matrix.envs }} 環境：aws/${{ matrix.envs }}</span>
+               # <span id="terraform-apply-${{ matrix.envs }}">${{ matrix.envs }} 環境</span>
                ## Apply
                ### Result
                ${{ steps.tf_apply.outcome }}
