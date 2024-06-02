@@ -21,7 +21,7 @@ name: deploy terraform
         contents: write
         pull-requests: write
       env:
-        env_accountid_mapping: '{"prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
+        env_accountid_mapping: '{"aws/environments/prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "aws/environments/dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
       steps:
         - name: checkout
           uses: actions/checkout@v4

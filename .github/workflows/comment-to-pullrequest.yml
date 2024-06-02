@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     env:
       # job matrix毎の処理中環境に対応したアカウントIDを取得するためのJSON
-      env_accountid_mapping: '{"prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
+      env_accountid_mapping: '{"aws/environments/prod": "${{ secrets.AWS_PROD_ACCOUNT_ID }}", "aws/environments/dev": "${{ secrets.AWS_DEV_ACCOUNT_ID }}"}'
     steps:
       - name: checkout
         uses: actions/checkout@v4
