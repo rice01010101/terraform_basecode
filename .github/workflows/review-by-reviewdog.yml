@@ -35,3 +35,11 @@ jobs:
           filter_mode: "nofilter"
           flags: -tee
           reporter: github-pr-review
+      - name: tfvalidate
+        uses: reviewdog/action-terraform-validate@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workdir: "aws/${{ matrix.envs }}"
+          level: warning
+          filter_mode: "nofilter"
+          reporter: github-pr-review
