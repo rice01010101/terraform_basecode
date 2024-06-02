@@ -18,5 +18,5 @@ resource "aws_instance" "web" {
 }
 
 locals {
-  tst = 12
+  tst = 121
 }
