@@ -22,3 +22,4 @@ jobs:
           PR_DESCRIPTION.EXTRA_INSTRUCTIONS: 'Japanese only'
           PR_REVIEWER.EXTRA_INSTRUCTIONS: 'Japanese only'
           PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: 'Japanese only'
+          CONFIG.MODEL: gpt-3.5-turbo-16k
