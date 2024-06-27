@@ -18,5 +18,5 @@ data "aws_availability_zones" "available" {}
 # }
 
 locals {
-  tst = 13321112
+  tst = 1
 }
