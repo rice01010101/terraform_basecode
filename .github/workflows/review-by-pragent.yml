@@ -33,3 +33,6 @@ jobs:
           CONFIG.FALLBACK_MODELS: 'bedrock/anthropic.claude-3-haiku-20240307-v1:0'
           AWS.BEDROCK_REGION: "us-east-1"
           LITELLM.DROP_PARAMS: true
+          PR_DESCRIPTION.PUBLISH_LABELS: false
+          PR_REVIEWER.ENABLE_REVIEW_LABELS_SECURITY: false
+          PR_REVIEWER.ENABLE_REVIEW_LABELS_EFFORT: false
