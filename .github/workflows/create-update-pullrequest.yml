@@ -36,10 +36,10 @@ jobs:
             ## PR内リンク（コメントが存在しない場合は遷移しない）
             ### AWS
             #### Dev環境
-            - [terraform init](#terraform-init-aws/test)
-            - [terraform validate](#terraform-validate-aws/test)
-            - [terraform plan](#terraform-plan-aws/test)
-            - [trivy](#trivy-result-aws/test)
+            - [terraform init](#terraform-init-aws/environments/dev)
+            - [terraform validate](#terraform-validate-aws/environments/dev)
+            - [terraform plan](#terraform-plan-aws/environments/dev)
+            - [trivy](#trivy-result-aws/environments/dev)
 
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}

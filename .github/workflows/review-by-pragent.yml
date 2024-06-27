@@ -13,6 +13,11 @@ jobs:
       pull-requests: write
       contents: write
     steps:
+      - name: Setup AWS auth
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: "us-east-1"
+          role-to-assume: "arn:aws:iam::${{ secrets.AWS_TFSTATE_ACCOUNT_ID }}:role/rice01010101-terraform_basecode-ghact-oidc-role"
       - name: PR Agent action step
         id: pragent
         uses: Codium-ai/pr-agent@main
@@ -22,4 +27,8 @@ jobs:
           PR_DESCRIPTION.EXTRA_INSTRUCTIONS: 'Japanese only'
           PR_REVIEWER.EXTRA_INSTRUCTIONS: 'Japanese only'
           PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: 'Japanese only'
-          CONFIG.MODEL: gpt-3.5-turbo-16k
+          CONFIG.MODEL: 'bedrock/anthropic.claude-3-haiku-20240307-v1:0'
+          CONFIG.MODEL_TURBO: 'bedrock/anthropic.claude-3-haiku-20240307-v1:0'
+          CONFIG.FALLBACK_MODELS: 'bedrock/anthropic.claude-3-haiku-20240307-v1:0'
+          AWS.BEDROCK_REGION: "us-east-1"
+          LITELLM.DROP_PARAMS: true
